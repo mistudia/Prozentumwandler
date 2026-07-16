@@ -223,6 +223,31 @@
       text-decoration: none;
     }
 
+
+
+.prozent-eingabe{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+}
+
+.prozent-eingabe input{
+    flex:1;
+    min-width:0;
+    text-align:center;
+}
+
+.prozent-eingabe span{
+    font-size:18px;
+    font-weight:bold;
+    color:#475569;
+    flex-shrink:0;
+}
+
+
+
+
     @media (max-width: 650px) {
       .app { padding: 18px 8px; }
 
@@ -246,7 +271,15 @@
         font-size: 15px;
       }
     }
+
+
+
+
+
   </style>
+
+
+
 </head>
 
 <body>
@@ -582,26 +615,75 @@ function levelWaehlen(level) {
 
 
 function aufgabenWerteErstellen() {
+
   let werte = [];
 
+  // 😊 Leicht
   if (aktuellesLevel === "leicht") {
-    werte = mischen(leichtWerte).slice(0, 10);
+
+    // 8 typische Prozentwerte
+
+    werte =
+      mischen(leichtWerte)
+        .slice(0, 8);
+
   }
 
+
+  // 🧠 Mittel
   if (aktuellesLevel === "mittel") {
-    werte = mischen(mittelWerte).slice(0, 8);
-    werte.push(zufallsWert(kleineWerte));
-    werte.push(zufallsWert(ueberHundertWerte));
+
+    // 6 typische Werte
+    werte =
+      mischen(mittelWerte)
+        .slice(0, 6);
+
+    // 1 kleiner Wert (1–9 %)
+    werte.push(
+      zufallsWert(kleineWerte)
+    );
+
+    // 1 Wert über 100 %
+    werte.push(
+      zufallsWert(
+        ueberHundertWerte
+      )
+    );
+
   }
 
+
+  // 🔥 Schwer
   if (aktuellesLevel === "schwer") {
-    werte = mischen(schwerGrosseWerte).slice(0, 7);
-    werte.push(zufallsWert(kleineWerte));
-    werte.push(zufallsWert(sehrKleineWerte));
-    werte.push(zufallsWert(ueberHundertWerte));
+
+    // 5 typische Werte
+    werte =
+      mischen(schwerGrosseWerte)
+        .slice(0, 5);
+
+    // 1 kleiner Wert
+    werte.push(
+      zufallsWert(kleineWerte)
+    );
+
+    // 1 sehr kleiner Kommawert
+    werte.push(
+      zufallsWert(
+        sehrKleineWerte
+      )
+    );
+
+    // 1 Wert über 100 %
+    werte.push(
+      zufallsWert(
+        ueberHundertWerte
+      )
+    );
+
   }
 
   return mischen(werte);
+
 }
 
 
@@ -620,9 +702,19 @@ function neueAufgaben() {
   aktuelleAufgaben.forEach((aufgabe, index) => {
     const t = texte[aktuelleSprache];
 
-    const prozentFeld = aufgabe.vorgabe === 0
-      ? `<div class="vorgegeben">${prozentAnzeigen(aufgabe.prozent)}</div>`
-      : `<input id="prozent-${index}" placeholder="${t.prozent}" autocomplete="off">`;
+ const prozentFeld = aufgabe.vorgabe === 0
+  ? `<div class="vorgegeben">${prozentAnzeigen(aufgabe.prozent)}</div>`
+  : `
+    <div class="prozent-eingabe">
+      <input
+        id="prozent-${index}"
+placeholder="${t.prozent}"
+        autocomplete="off"
+      >
+      <span>%</span>
+    </div>
+  `;
+
 
     const bruchFeld = aufgabe.vorgabe === 1
       ? `<div class="vorgegeben">${bruchAnzeigen(aufgabe.prozent)}</div>`
@@ -749,7 +841,7 @@ function loesungZeigen() {
   aktuelleAufgaben.forEach((aufgabe, index) => {
     if (aufgabe.vorgabe !== 0) {
       const feld = document.getElementById(`prozent-${index}`);
-      feld.value = prozentAnzeigen(aufgabe.prozent);
+feld.value = zahlAnzeigen(aufgabe.prozent);
       feld.className = "richtig";
     }
 
