@@ -217,12 +217,26 @@
       line-height: 1.8;
     }
 
-    .footer a {
-      color: #2563eb;
-      font-weight: bold;
-      text-decoration: none;
-    }
+.footer-logo{
+    width:170px;
+    max-width:70%;
+    display:block;
+    margin:0 auto 12px;
+}
 
+.footer-text{
+    font-size:15px;
+}
+
+.footer a{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.footer a:hover{
+    text-decoration:underline;
+}
 
 
 .prozent-eingabe{
@@ -234,11 +248,15 @@
 
 .prozent-eingabe input{
     flex:1;
-    min-width:0;
+    min-width:80px;
     text-align:center;
 }
 
 .prozent-eingabe span{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:47px;
     font-size:18px;
     font-weight:bold;
     color:#475569;
@@ -272,7 +290,10 @@
       }
     }
 
-
+input.hinweis{
+    border-color:#facc15;
+    background:#fef9c3;
+}
 
 
 
@@ -361,19 +382,33 @@
 
   <div id="ergebnis"></div>
 
-  <footer class="footer">
-    <a href="https://mistudia.com"
-       target="_blank"
-       rel="noopener noreferrer">
-      miStudia.com
+<footer class="footer">
+
+  <a
+    href="https://mistudia.com"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+src="mistudia-logo.png"
+      alt="miStudia"
+      class="footer-logo"
+    >
+  </a>
+
+  <div class="footer-text">
+    © <span id="copyright-jahr"></span> miStudia ·
+    <a
+      href="https://mistudia.com"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      mistudia.com
     </a>
+  </div>
 
-    <br>
+</footer>
 
-    © <span id="copyright-jahr"></span>
-    miStudia –
-    <span id="copyrightText">Alle Rechte vorbehalten.</span>
-  </footer>
 
 </div>
 
@@ -519,8 +554,6 @@ function texteAktualisieren() {
   document.getElementById("pruefenText").textContent = t.pruefen;
   document.getElementById("loesungText").textContent = t.loesung;
   document.getElementById("neuText").textContent = t.neu;
-
-  document.getElementById("copyrightText").textContent = t.copyright;
 }
 
 
@@ -613,7 +646,6 @@ function levelWaehlen(level) {
   neueAufgaben();
 }
 
-
 function aufgabenWerteErstellen() {
 
   let werte = [];
@@ -621,45 +653,40 @@ function aufgabenWerteErstellen() {
   // 😊 Leicht
   if (aktuellesLevel === "leicht") {
 
-    // 8 typische Prozentwerte
-
+    // 7 typische Prozentwerte
     werte =
       mischen(leichtWerte)
-        .slice(0, 8);
+        .slice(0, 7);
 
   }
-
 
   // 🧠 Mittel
   if (aktuellesLevel === "mittel") {
 
-    // 6 typische Werte
+    // 5 typische Werte
     werte =
       mischen(mittelWerte)
-        .slice(0, 6);
+        .slice(0, 5);
 
-    // 1 kleiner Wert (1–9 %)
+    // 1 kleiner Wert
     werte.push(
       zufallsWert(kleineWerte)
     );
 
     // 1 Wert über 100 %
     werte.push(
-      zufallsWert(
-        ueberHundertWerte
-      )
+      zufallsWert(ueberHundertWerte)
     );
 
   }
 
-
   // 🔥 Schwer
   if (aktuellesLevel === "schwer") {
 
-    // 5 typische Werte
+    // 4 typische Werte
     werte =
       mischen(schwerGrosseWerte)
-        .slice(0, 5);
+        .slice(0, 4);
 
     // 1 kleiner Wert
     werte.push(
@@ -668,16 +695,12 @@ function aufgabenWerteErstellen() {
 
     // 1 sehr kleiner Kommawert
     werte.push(
-      zufallsWert(
-        sehrKleineWerte
-      )
+      zufallsWert(sehrKleineWerte)
     );
 
     // 1 Wert über 100 %
     werte.push(
-      zufallsWert(
-        ueberHundertWerte
-      )
+      zufallsWert(ueberHundertWerte)
     );
 
   }
@@ -685,7 +708,6 @@ function aufgabenWerteErstellen() {
   return mischen(werte);
 
 }
-
 
 function neueAufgaben() {
   const werte = aufgabenWerteErstellen();
@@ -772,6 +794,34 @@ function bruchWert(text) {
   return zaehler / nenner;
 }
 
+function bruchIstGekuerzt(text){
+
+    const teile = text.replace(/\s/g,"").split("/");
+
+    if(teile.length !== 2){
+        return false;
+    }
+
+    const zaehler = Math.abs(
+        Number(teile[0].replace(",","."))
+    );
+
+    const nenner = Math.abs(
+        Number(teile[1].replace(",","."))
+    );
+
+    if(
+        !Number.isFinite(zaehler) ||
+        !Number.isFinite(nenner) ||
+        nenner===0
+    ){
+        return false;
+    }
+
+    return ggt(zaehler,nenner)===1;
+
+}
+
 
 function feldPruefen(feld, richtig) {
   feld.className = richtig ? "richtig" : "falsch";
@@ -800,18 +850,47 @@ function pruefen() {
       if (!richtig) allesRichtig = false;
     }
 
-    if (aufgabe.vorgabe !== 1) {
-      const feld = document.getElementById(`bruch-${index}`);
-      const wert = bruchWert(feld.value);
+if (aufgabe.vorgabe !== 1) {
 
-      const richtig =
-        wert !== null &&
-        Math.abs(wert - erwarteterWert) < 0.0000000001;
+  const feld =
+    document.getElementById(`bruch-${index}`);
 
-      feldPruefen(feld, richtig);
+  const wert =
+    bruchWert(feld.value);
 
-      if (!richtig) allesRichtig = false;
+  const richtig =
+    wert !== null &&
+    Math.abs(
+      wert - erwarteterWert
+    ) < 0.0000000001;
+
+  if (richtig) {
+
+    if (bruchIstGekuerzt(feld.value)) {
+
+      feld.className = "richtig";
+
+    } else {
+
+      // mathematisch richtig,
+      // aber nicht vollständig gekürzt
+
+      feld.className = "hinweis";
+
+      allesRichtig = false;
+
     }
+
+  } else {
+
+    feld.className = "falsch";
+
+    allesRichtig = false;
+
+  }
+
+}
+
 
     if (aufgabe.vorgabe !== 2) {
       const feld = document.getElementById(`dezimal-${index}`);
@@ -834,8 +913,83 @@ function pruefen() {
     texte[aktuelleSprache].ergebnis
       .replace("{richtig}", komplettRichtig)
       .replace("{gesamt}", aktuelleAufgaben.length);
+
+if (komplettRichtig === aktuelleAufgaben.length) {
+
+    setTimeout(jubelChoreo,400);
+
+}
 }
 
+function konfettiAusRüssel(){
+
+    const elefant = document.getElementById("jubelElefant");
+    const rect = elefant.getBoundingClientRect();
+
+const startX = rect.left + 20;
+const startY = rect.top + 70;
+
+    for(let i=0;i<40;i++){
+
+        const k = document.createElement("div");
+
+        k.style.position="fixed";
+        k.style.left=startX+"px";
+        k.style.top=startY+"px";
+
+        k.style.width="8px";
+        k.style.height="8px";
+
+        k.style.borderRadius="50%";
+
+        k.style.background=`hsl(${Math.random()*360},100%,50%)`;
+
+        k.style.zIndex="10001";
+
+        document.body.appendChild(k);
+
+const x = -(120 + Math.random()*260);
+const y = Math.random()*180 - 90;
+
+        k.animate([
+            {
+                transform:"translate(0,0)",
+                opacity:1
+            },
+            {
+                transform:`translate(${x}px,${y}px)`,
+                opacity:0
+            }
+        ],{
+            duration:1200+Math.random()*500,
+            easing:"ease-out"
+        });
+
+        setTimeout(()=>k.remove(),1700);
+
+    }
+
+}
+
+function jubelChoreo(){
+
+    const elefant =
+        document.getElementById("jubelElefant");
+
+    elefant.style.display="block";
+
+    const interval =
+        setInterval(konfettiAusRüssel,300);
+
+    setTimeout(()=>{
+
+        clearInterval(interval);
+
+        elefant.style.display="none";
+
+    },4000);
+
+}
 
 function loesungZeigen() {
   aktuelleAufgaben.forEach((aufgabe, index) => {
@@ -870,6 +1024,21 @@ texteAktualisieren();
 neueAufgaben();
 
 </script>
+
+<img
+    id="jubelElefant"
+    src="elefant.png"
+    alt="Jubel-Elefant"
+    style="
+        display:none;
+        position:fixed;
+   right:25px;
+bottom:25px;
+        width:180px;
+        z-index:10000;
+        pointer-events:none;
+    ">
+
 
 </body>
 </html>
